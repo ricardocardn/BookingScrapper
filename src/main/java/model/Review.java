@@ -3,7 +3,7 @@ package model;
 import java.util.Arrays;
 
 public class Review {
-    private int hotelId;
+    private String hotelId;
     private String title;
     private int score;
     private String positive;
@@ -16,7 +16,7 @@ public class Review {
     private String countryCode;
     private String photos[];
 
-    public Review(int hotelId, String title, int score, String positive, String negative, String travellerType, String room, int nightsStay, String date, String country, String countryCode, String[] photos) {
+    public Review(String hotelId, String title, int score, String positive, String negative, String travellerType, String room, int nightsStay, String date, String country, String countryCode, String[] photos) {
         this.hotelId = hotelId;
         this.title = title;
         this.score = score;
@@ -33,7 +33,7 @@ public class Review {
 
     public Review() {}
 
-    public int getHotelId() {
+    public String getHotelId() {
         return hotelId;
     }
 
@@ -81,7 +81,7 @@ public class Review {
         return photos;
     }
 
-    public void setHotelId(int hotelId) {
+    public void setHotelId(String hotelId) {
         this.hotelId = hotelId;
     }
 

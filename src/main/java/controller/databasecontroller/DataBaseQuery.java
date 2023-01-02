@@ -1,5 +1,7 @@
 package controller.databasecontroller;
 
+import com.google.gson.Gson;
+import controller.databasecontroller.DataBaseConnection;
 import model.Hotel;
 import model.Review;
 
@@ -8,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DataBaseQuery implements Query {
     private DataBaseConnection dataBaseConnection;
@@ -40,7 +43,7 @@ public class DataBaseQuery implements Query {
     private Review getReview(ResultSet rs) throws SQLException {
         Review review = new Review();
 
-        review.setHotelId(rs.getInt(1));
+        review.setHotelId(rs.getString(1));
         review.setTitle(rs.getString(2));
         review.setScore(rs.getInt(3));
         review.setPositive(rs.getString(4));
@@ -62,6 +65,8 @@ public class DataBaseQuery implements Query {
         hotel.setType(rs.getString(3));
         hotel.setStars(rs.getInt(4));
         hotel.setRating(rs.getInt(5));
+        hotel.setServices(new Gson().fromJson(rs.getString(8), Map.class));
+        hotel.setGrades(new Gson().fromJson(rs.getString(9), Map.class));
         return hotel;
     }
 }

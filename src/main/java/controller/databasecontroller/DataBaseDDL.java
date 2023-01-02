@@ -1,28 +1,43 @@
 package controller.databasecontroller;
 
+import com.google.gson.Gson;
 import model.Hotel;
 import model.Review;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DataBaseDDL {
+    private static DataBaseDDL dataBaseDDL;
     private DataBaseConnection dataBaseConnection;
+    private int id = 0;
 
     public DataBaseDDL(DataBaseConnection dataBaseConnection) {
         this.dataBaseConnection = dataBaseConnection;
+        this.dataBaseDDL = this;
+    }
+
+    public static DataBaseDDL getInstance() throws SQLException {
+        if (dataBaseDDL != null) {
+            return dataBaseDDL;
+        } else {
+            throw new SQLException();
+        }
     }
 
     public void createHotelsTable() {
         String dbPath = "jdbc:sqlite:" + dataBaseConnection.getDbPath();
         String sql = "CREATE TABLE IF NOT EXISTS Hotels (\n"
-                + "id NUMBER PRIMARY KEY,\n"
+                + "id NUMBER NOT NULL,\n"
                 + "name text NOT NULL,\n"
                 + "type text,\n"
                 + "stars NUMBER,\n"
                 + "rating NUMBER,\n"
                 + "reviews NUMBER integer,\n"
-                + "address TEXT\n"
+                + "address TEXT,\n"
+                + "services TEXT NOT NULL,\n"
+                + "grades TEXT NOT NULL\n"
                 + ");";
 
         if (dataBaseConnection.getConn() != null) {
@@ -68,17 +83,19 @@ public class DataBaseDDL {
     }
 
     public void insertIntoHotels(Hotel hotel) {
-        String sql = "INSERT INTO Hotels(id,name,type,stars,rating,reviews,address) VALUES(?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Hotels(id,name,type,stars,rating,reviews,address,services,grades) VALUES(?,?,?,?,?,?,?,?,?)";
         try {
             if (dataBaseConnection.getConn() == null) dataBaseConnection.connect();
             PreparedStatement pstmt = dataBaseConnection.getConn().prepareStatement(sql);
-            pstmt.setInt(1, hotel.getId());
+            pstmt.setInt(1, id++);
             pstmt.setString(2, hotel.getName());
             pstmt.setString(3, hotel.getType());
             pstmt.setInt(4, hotel.getStars());
             pstmt.setFloat(5, hotel.getRating());
             pstmt.setInt(6, hotel.getTotalReviews());
             pstmt.setString(7, hotel.getAddress().toString());
+            pstmt.setString(8, new Gson().toJson(hotel.getServices()));
+            pstmt.setString(9, new Gson().toJson(hotel.getGrades()));
             pstmt.executeUpdate();
 
         } catch (Exception ex) {

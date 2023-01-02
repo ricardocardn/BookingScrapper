@@ -12,20 +12,18 @@ public class Hotel {
     }
     private int id;
     private String name;
-    private String location;
     private String type;
     private int stars;
     private float rating;
     private int totalReviews;
-    private List<ShortReview> reviews;
-    private Address address;
+    private List<Review> reviews;
+    private String address;
     private Map<String, List<String>> services;
     private Map<String, Float> grades;
 
-    public Hotel(int id, String name, String location, String type, int stars, float rating, int reviews, Address address) {
+    public Hotel(int id, String name, String location, String type, int stars, float rating, int reviews, String address) {
         this.id = id;
         this.name = name;
-        this.location = location;
         this.type = type;
         this.stars = stars;
         this.rating = rating;
@@ -48,10 +46,6 @@ public class Hotel {
         return name;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
     public String getType() {
         return type;
     }
@@ -68,16 +62,20 @@ public class Hotel {
         return totalReviews;
     }
 
-    public Address getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public List<ShortReview> getReviews() {
+    public List<Review> getReviews() {
         return reviews;
     }
 
     public Map<String, List<String>> getServices() {
         return services;
+    }
+
+    public Map<String, Float> getGrades() {
+        return grades;
     }
 
     public void setId(int id) {
@@ -86,10 +84,6 @@ public class Hotel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public void setType(String type) {
@@ -108,12 +102,20 @@ public class Hotel {
         this.totalReviews = totalReviews;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
-    public void setReviews(List<ShortReview> reviews) {
+    public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
+    }
+
+    public void setServices(Map<String, List<String>> services) {
+        this.services = services;
+    }
+
+    public void setGrades(Map<String, Float> grades) {
+        this.grades = grades;
     }
 
     public void insertService(String service, List<String> services) {
@@ -129,7 +131,6 @@ public class Hotel {
         return "Hotel{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", location='" + location + '\'' +
                 ", type='" + type + '\'' +
                 ", stars=" + stars +
                 ", rating=" + rating +
