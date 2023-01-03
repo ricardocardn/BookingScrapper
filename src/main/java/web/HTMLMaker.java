@@ -3,6 +3,13 @@ package web;
 import java.io.*;
 
 public class HTMLMaker {
+    public static HTMLMaker htmlMaker;
+
+    public static HTMLMaker getInstance() {
+        if (htmlMaker == null)
+            htmlMaker = new HTMLMaker();
+        return htmlMaker;
+    }
 
     public HTMLMaker() {}
 

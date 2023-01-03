@@ -10,7 +10,7 @@ public class Hotel {
         PARKING, FrontDESK, CLEANING, BUSINESS, SECURITY,
         GENERAL, ACCESSIBILITY, SPA
     }
-    private int id;
+    private String id;
     private String name;
     private String type;
     private int stars;
@@ -21,7 +21,7 @@ public class Hotel {
     private Map<String, List<String>> services;
     private Map<String, Float> grades;
 
-    public Hotel(int id, String name, String location, String type, int stars, float rating, int reviews, String address) {
+    public Hotel(String id, String name, String location, String type, int stars, float rating, int reviews, String address) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -38,7 +38,7 @@ public class Hotel {
         this.services = new HashMap<>();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -78,7 +78,7 @@ public class Hotel {
         return grades;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -8,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DataBaseDDL {
+public class DataBaseDDL implements DDLdb {
     private static DataBaseDDL dataBaseDDL;
     private DataBaseConnection dataBaseConnection;
     private int id = 0;
@@ -26,15 +26,22 @@ public class DataBaseDDL {
         }
     }
 
-    public void createHotelsTable() {
+    @Override
+    public void createTables() {
+        createHotelsTable();
+        createReviewsTable();
+    }
+
+    private void createHotelsTable() {
         String dbPath = "jdbc:sqlite:" + dataBaseConnection.getDbPath();
         String sql = "CREATE TABLE IF NOT EXISTS Hotels (\n"
-                + "id NUMBER NOT NULL,\n"
+                + "id TEXT NOT NULL,\n"
                 + "name text NOT NULL,\n"
                 + "type text,\n"
                 + "stars NUMBER,\n"
                 + "rating NUMBER,\n"
                 + "reviews NUMBER integer,\n"
+                + "reviewsData TEXT integer,\n"
                 + "address TEXT,\n"
                 + "services TEXT NOT NULL,\n"
                 + "grades TEXT NOT NULL\n"
@@ -53,9 +60,9 @@ public class DataBaseDDL {
         }
     }
 
-    public void createReviewsTable() {
+    private void createReviewsTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Reviews (\n"
-                + "hotelId NUMBER NOT NULL,\n"
+                + "hotelId TEXT NOT NULL,\n"
                 + "title text NOT NULL,\n"
                 + "score integer,\n"
                 + "positive TEXT,\n"
@@ -82,20 +89,27 @@ public class DataBaseDDL {
         }
     }
 
-    public void insertIntoHotels(Hotel hotel) {
-        String sql = "INSERT INTO Hotels(id,name,type,stars,rating,reviews,address,services,grades) VALUES(?,?,?,?,?,?,?,?,?)";
+    @Override
+    public void insertIntoTable(String name, Object object) {
+        if (name.equalsIgnoreCase("hotels")) insertIntoHotels((Hotel) object);
+        else if (name.equalsIgnoreCase("reviews")) insertIntoReviews((Review) object);
+    }
+
+    private void insertIntoHotels(Hotel hotel) {
+        String sql = "INSERT INTO Hotels(id,name,type,stars,rating,reviews,reviewsData,address,services,grades) VALUES(?,?,?,?,?,?,?,?,?,?)";
         try {
             if (dataBaseConnection.getConn() == null) dataBaseConnection.connect();
             PreparedStatement pstmt = dataBaseConnection.getConn().prepareStatement(sql);
-            pstmt.setInt(1, id++);
+            pstmt.setString(1, hotel.getId());
             pstmt.setString(2, hotel.getName());
             pstmt.setString(3, hotel.getType());
             pstmt.setInt(4, hotel.getStars());
             pstmt.setFloat(5, hotel.getRating());
             pstmt.setInt(6, hotel.getTotalReviews());
-            pstmt.setString(7, hotel.getAddress().toString());
-            pstmt.setString(8, new Gson().toJson(hotel.getServices()));
-            pstmt.setString(9, new Gson().toJson(hotel.getGrades()));
+            pstmt.setString(7, new Gson().toJson(hotel.getReviews()));
+            pstmt.setString(8, hotel.getAddress().toString());
+            pstmt.setString(9, new Gson().toJson(hotel.getServices()));
+            pstmt.setString(10, new Gson().toJson(hotel.getGrades()));
             pstmt.executeUpdate();
 
         } catch (Exception ex) {
@@ -103,13 +117,13 @@ public class DataBaseDDL {
         }
     }
 
-    public void insertIntoReviews(Review review, int id) {
+    private void insertIntoReviews(Review review) {
 
         String sql = "INSERT INTO Reviews(hotelId,title,score,positive,negative,travellerType,room,nightStay,date,country,countryCode) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
         try {
             if (dataBaseConnection.getConn() == null) dataBaseConnection.connect();
             PreparedStatement pstmt = dataBaseConnection.getConn().prepareStatement(sql);
-            pstmt.setInt(1, id);
+            pstmt.setString(1, review.getHotelId());
             pstmt.setString(2, review.getTitle());
             pstmt.setInt(3, review.getScore());
             pstmt.setString(4, review.getPositive());

@@ -60,13 +60,14 @@ public class DataBaseQuery implements Query {
     private Hotel getHotel(ResultSet rs) throws SQLException {
         Hotel hotel = new Hotel();
 
-        hotel.setId(rs.getInt(1));
+        hotel.setId(rs.getString(1));
         hotel.setName(rs.getString(2));
         hotel.setType(rs.getString(3));
         hotel.setStars(rs.getInt(4));
         hotel.setRating(rs.getInt(5));
-        hotel.setServices(new Gson().fromJson(rs.getString(8), Map.class));
-        hotel.setGrades(new Gson().fromJson(rs.getString(9), Map.class));
+        hotel.setReviews(new Gson().fromJson(rs.getString(7), List.class));
+        hotel.setServices(new Gson().fromJson(rs.getString(9), Map.class));
+        hotel.setGrades(new Gson().fromJson(rs.getString(10), Map.class));
         return hotel;
     }
 }

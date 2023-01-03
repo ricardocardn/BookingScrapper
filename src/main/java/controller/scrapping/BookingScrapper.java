@@ -40,6 +40,7 @@ public class BookingScrapper implements HotelScrapper {
         Connection hotelConn = Jsoup.connect("https://www.booking.com/hotel/es/" + name + ".es.html").userAgent("Mozilla/5.0").timeout(100000);
         Document hotelDoc = hotelConn.get();
 
+        hotel.setId(name);
         hotel.setName(hotelDoc.select("h2.d2fee87262.pp-header__title").text());
         hotel.setStars(hotelDoc.select("span.b6dc9a9e69.adc357e4f1.fe621d6382").size());
         hotel.setRating(Float.parseFloat(hotelDoc.select("div.b5cd09854e.d10a6220b4").get(0).text().replace(",", ".")));
