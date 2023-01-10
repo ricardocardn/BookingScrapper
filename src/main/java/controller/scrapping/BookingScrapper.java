@@ -40,20 +40,22 @@ public class BookingScrapper implements HotelScrapper {
         Connection hotelConn = Jsoup.connect("https://www.booking.com/hotel/es/" + name + ".es.html").userAgent("Mozilla/5.0").timeout(100000);
         Document hotelDoc = hotelConn.get();
 
+        getGeneralInfo(name, hotel, hotelDoc);
+        getGrades(hotel, hotelDoc);
+        getServices(hotel, hotelDoc);
+        getReviews(hotel, hotelDoc, hotelConn, name);
+        hotel.setTotalReviews(hotel.getReviews().size());
+
+        return hotel;
+    }
+
+    private void getGeneralInfo(String name, Hotel hotel, Document hotelDoc) {
         hotel.setId(name);
         hotel.setName(hotelDoc.select("h2.d2fee87262.pp-header__title").text());
         hotel.setStars(hotelDoc.select("span.b6dc9a9e69.adc357e4f1.fe621d6382").size());
         hotel.setRating(Float.parseFloat(hotelDoc.select("div.b5cd09854e.d10a6220b4").get(0).text().replace(",", ".")));
         hotel.setType(hotelDoc.select("span.e2f34d59b1").get(0).text());
         hotel.setAddress(hotelDoc.select("span.hp_address_subtitle.js-hp_address_subtitle.jq_tooltip").text());
-
-        getGrades(hotel, hotelDoc);
-        getServices(hotel, hotelDoc);
-        getReviews(hotel, hotelDoc, hotelConn, name);
-
-        hotel.setTotalReviews(hotel.getReviews().size());
-
-        return hotel;
     }
 
     private void getReviews(Hotel hotel, Document hotelDoc, Connection hotelConn, String name) throws IOException {
@@ -66,20 +68,21 @@ public class BookingScrapper implements HotelScrapper {
         List<Review> reviews = new ArrayList<>();
 
         for (Element docReview : docReviews) {
-            Review review = new Review();
-            //review.setCountry(docReview.select("span.reviewer_country_flag.sflag.slang-es..").text());
-            review.setScore(Integer.parseInt(docReview.select("span.review-score-badge").text().replace(",", "")));
-            review.setHotelId(name);
-            review.setPositive(docReview.select("p.review_pos").text());
-            review.setNegative(docReview.select("p.review_neg").text());
-            try {
-                //review.setNegative(rev.get(1).text());
-            } catch (IndexOutOfBoundsException e) {}
-
+            Review review = getReview(name, docReview);
             reviews.add(review);
         }
 
         hotel.setReviews(reviews);
+    }
+
+    private Review getReview(String name, Element docReview) {
+        Review review = new Review();
+        //review.setCountry(docReview.select("span.reviewer_country_flag.sflag.slang-es..").text());
+        review.setScore(Integer.parseInt(docReview.select("span.review-score-badge").text().replace(",", "")));
+        review.setHotelId(name);
+        review.setPositive(docReview.select("p.review_pos").text());
+        review.setNegative(docReview.select("p.review_neg").text());
+        return review;
     }
 
     private void getServices(Hotel hotel, Document hotelDoc) {

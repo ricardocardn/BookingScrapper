@@ -1,0 +1,66 @@
+<html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Document</title>
+<style>
+.error {
+background: #E9EFF2;
+margin: auto;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 30px;
+padding-bottom: 30px;
+}
+.info {
+width: 80%;
+margin: auto;
+}
+h1 {
+color: white;
+font-family: sans-serif, arial;
+color: #00487a;
+margin-top: 50px;
+}
+.sub {
+color: #C3D1D6;
+margin-left: 20px;
+}
+p {
+margin-top: 20px;
+color: #092A35;
+font-family: arial;
+width: 100%;
+}
+.dt {
+display: flex;
+}
+li {
+font-family: arial;
+}
+</style>
+</head>
+<body>
+    <div class="info">
+        <div class="dt">
+            <h1>Booking Scrapper API</h1>
+            <h1 class="sub">V1.0</h1>
+        </div>
+        <p class="desc">You can use this API to obtain relevant information of whatever hotel you are interested in. In the box bellow, you can see the paths you need to use according to reach your purpose. Any <a name="help"></a> help you may need is also included after this paragraph.</p>
+        <div class="error">
+            <ul>
+                <li>To see all hotels you have looked for in this session go to <a href="v1/hotels">http://localhost:8086/v1/hotels</a></li>
+                <li>To get the information of a concrete hotel, http://localhost:8088/v1/hotels/:id, where id is the name booking gives the hotel in its url</li>
+                <li>To check reviews of any hotel, whether you have searched it before or not, go to http://localhost:8086/v1/hotels/:id/reviews</li>
+            </ul>
+
+            <p>Because of the way this API has been implemented, whenever you look for a hotel it will automatically be saved for your user. This way consults for any of these hotels will be faster, since the information has been locally stored to avoid sending repetitive requests to Booking servers.</p>
+        </div>
+    </div>
+    <center>
+        <p>©Ricardo Cárdenes, ULPGC</p>
+    </center>
+</body>
+</html>

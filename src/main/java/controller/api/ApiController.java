@@ -1,28 +1,21 @@
-package api;
+package controller.api;
 
 import com.google.gson.Gson;
 import controller.databasecontroller.*;
 import controller.scrapping.BookingScrapper;
 import controller.scrapping.HotelScrapper;
 import model.Hotel;
-import model.Request;
-import model.Review;
-import spark.Spark;
 import web.HTMLMaker;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
 import java.util.stream.Collectors;
 
 import static spark.Spark.*;
 
-public class Main extends Thread {
-    private static Gson gson = new Gson();
+public class ApiController extends Thread {
+    private static final Gson gson = new Gson();
     private static List<Hotel> hotels;
     private static DataBaseConnection dataBaseConnection;
     private static DDLdb dataBaseDDL;
@@ -30,37 +23,40 @@ public class Main extends Thread {
     private static HotelScrapper bookingScrapper;
     private static HTMLMaker htmlMaker;
 
-    public static boolean isJson(spark.Request req) {
-        return (req.queryParams("accept") != null && req.queryParams("accept").equals("json"))
-                || req.headers("Accept").equals("application/json");
-    }
-
-    public static void initialize() {
+    public ApiController(HotelScrapper hotelScrapper) {
         dataBaseConnection = new DataBaseConnection("src/main/HotelsDataBase.db");
         dataBaseConnection.connect();
         dataBaseDDL = new DataBaseDDL(dataBaseConnection);
         dataBaseDDL.createTables();
         query = new DataBaseQuery(dataBaseConnection);
-
-        bookingScrapper = new BookingScrapper();
+        bookingScrapper = hotelScrapper;
         htmlMaker = new HTMLMaker();
     }
 
-    public static void main(String[] args) throws Exception {
-        initialize();
-
-        port(8086);
+    public void run() {
+        port(8088);
 
         initialGetReq();
         getHotelsReq();
+        getHotelsJsonReq();
         getHotelByIdReq();
+        getHotelByIdJsonReq();
         getHotelReviewsReq();
+        getHotelReviewsJsonReq();
+        notAPageErrorJsonHandler();
         notAPageErrorHandler();
     }
 
     private static void notAPageErrorHandler() {
         get("//*", (req, res) -> {
-            FileInputStream fileInputStream = new FileInputStream(new File("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404notapage.html"));
+            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404notapage.html");
+            return fileInputStream.readAllBytes();
+        });
+    }
+
+    private static void notAPageErrorJsonHandler() {
+        get("/v1/json/*", (req, res) -> {
+            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404notapage.html");
             return fileInputStream.readAllBytes();
         });
     }
@@ -70,7 +66,6 @@ public class Main extends Thread {
             for (Object hotel: query.getObjectList("Hotels")) {
                 System.out.println(((Hotel)hotel).getId());
                 if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":name"))) {
-                    if (isJson(req)) return new Gson().toJson(((Hotel) hotel).getReviews());
                     return htmlMaker.feedHTML(new Gson().toJson(((Hotel) hotel).getReviews()), "src/main/java/web/index.html");
                 }
             }
@@ -78,16 +73,30 @@ public class Main extends Thread {
             String json = null;
             Hotel hotel = bookingScrapper.getHotel(req.params(":name"));
             dataBaseDDL.insertIntoTable("hotels", hotel);
-            if (isJson(req)) return new Gson().toJson(hotel);
             return htmlMaker.feedHTML(new Gson().toJson(hotel.getReviews()), "src/main/java/web/index.html");
+        });
+    }
+
+    private static void getHotelReviewsJsonReq() {
+        get("/v1/json/hotels/:name/reviews", (req, res) -> {
+            for (Object hotel: query.getObjectList("Hotels")) {
+                System.out.println(((Hotel)hotel).getId());
+                if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":name"))) {
+                    return new Gson().toJson(((Hotel) hotel).getReviews());
+                }
+            }
+
+            String json = null;
+            Hotel hotel = bookingScrapper.getHotel(req.params(":name"));
+            dataBaseDDL.insertIntoTable("hotels", hotel);
+            return new Gson().toJson(hotel);
         });
     }
 
     private static void initialGetReq() {
         get("/v1", (req, res) -> {
             System.out.println(req.headers("Accept"));
-            if (isJson(req)) return "{}";
-            FileInputStream fileInputStream = new FileInputStream(new File("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\index.html"));
+            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\home.html");
             return fileInputStream.readAllBytes();
         });
     }
@@ -98,7 +107,6 @@ public class Main extends Thread {
 
             for (Object hotel: query.getObjectList("Hotels")) {
                 if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":id"))) {
-                    if (isJson(req)) return new Gson().toJson(hotel);
                     return htmlMaker.feedHTML(new Gson().toJson(hotel), "src/main/java/web/index.html");
                 }
             }
@@ -107,14 +115,34 @@ public class Main extends Thread {
             try {
                 hotel = bookingScrapper.getHotel(req.params(":id"));
             } catch (Exception e) {
-                if (isJson(req)) return new Gson().toJson(new Hotel());
-                FileInputStream fileInputStream = new FileInputStream(new File("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404.html"));
+                FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404.html");
                 return fileInputStream.readAllBytes();
             }
 
             dataBaseDDL.insertIntoTable("hotels", hotel);
-            if (isJson(req)) return new Gson().toJson(hotel);
             return htmlMaker.feedHTML(new Gson().toJson(hotel), "src/main/java/web/index.html");
+        });
+    }
+
+    private static void getHotelByIdJsonReq() {
+        get("/v1/json/hotels/:id", (req, res) -> {
+            String json = null;
+
+            for (Object hotel: query.getObjectList("Hotels")) {
+                if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":id"))) {
+                    return new Gson().toJson(hotel);
+                }
+            }
+
+            Hotel hotel;
+            try {
+                hotel = bookingScrapper.getHotel(req.params(":id"));
+            } catch (Exception e) {
+                return "{\"error\":404}";
+            }
+
+            dataBaseDDL.insertIntoTable("hotels", hotel);
+            return new Gson().toJson(hotel);
         });
     }
 
@@ -124,8 +152,17 @@ public class Main extends Thread {
                     .map(o -> (Hotel) o)
                     .collect(Collectors.toList());
 
-            if (isJson(req)) return new Gson().toJson(hotels);
             return htmlMaker.feedHTML(new Gson().toJson(hotels), "src/main/java/web/index.html");
+        });
+    }
+
+    private static void getHotelsJsonReq() {
+        get("/v1/json/hotels", (req, res) -> {
+            List<Hotel> hotels = query.getObjectList("Hotels").stream()
+                    .map(o -> (Hotel) o)
+                    .collect(Collectors.toList());
+
+            return new Gson().toJson(hotels);
         });
     }
 }
