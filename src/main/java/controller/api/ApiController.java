@@ -24,7 +24,7 @@ public class ApiController extends Thread {
     private static HTMLMaker htmlMaker;
 
     public ApiController(HotelScrapper hotelScrapper) {
-        dataBaseConnection = new DataBaseConnection("src/main/HotelsDataBase.db");
+        dataBaseConnection = new DataBaseConnection("HotelsDataBase.db");
         dataBaseConnection.connect();
         dataBaseDDL = new DataBaseDDL(dataBaseConnection);
         dataBaseDDL.createTables();
@@ -49,14 +49,14 @@ public class ApiController extends Thread {
 
     private static void notAPageErrorHandler() {
         get("//*", (req, res) -> {
-            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404notapage.html");
+            FileInputStream fileInputStream = new FileInputStream("web/error404notapage.html");
             return fileInputStream.readAllBytes();
         });
     }
 
     private static void notAPageErrorJsonHandler() {
         get("/v1/json/*", (req, res) -> {
-            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404notapage.html");
+            FileInputStream fileInputStream = new FileInputStream("web/error404notapage.html");
             return fileInputStream.readAllBytes();
         });
     }
@@ -66,14 +66,14 @@ public class ApiController extends Thread {
             for (Object hotel: query.getObjectList("Hotels")) {
                 System.out.println(((Hotel)hotel).getId());
                 if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":name"))) {
-                    return htmlMaker.feedHTML(new Gson().toJson(((Hotel) hotel).getReviews()), "src/main/java/web/index.html");
+                    return htmlMaker.feedHTML(new Gson().toJson(((Hotel) hotel).getReviews()), "web/index.html");
                 }
             }
 
             String json = null;
             Hotel hotel = bookingScrapper.getHotel(req.params(":name"));
             dataBaseDDL.insertIntoTable("hotels", hotel);
-            return htmlMaker.feedHTML(new Gson().toJson(hotel.getReviews()), "src/main/java/web/index.html");
+            return htmlMaker.feedHTML(new Gson().toJson(hotel.getReviews()), "web/index.html");
         });
     }
 
@@ -96,7 +96,7 @@ public class ApiController extends Thread {
     private static void initialGetReq() {
         get("/v1", (req, res) -> {
             System.out.println(req.headers("Accept"));
-            FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\home.html");
+            FileInputStream fileInputStream = new FileInputStream("web/home.html");
             return fileInputStream.readAllBytes();
         });
     }
@@ -107,7 +107,7 @@ public class ApiController extends Thread {
 
             for (Object hotel: query.getObjectList("Hotels")) {
                 if (((Hotel) hotel).getId().equalsIgnoreCase(req.params(":id"))) {
-                    return htmlMaker.feedHTML(new Gson().toJson(hotel), "src/main/java/web/index.html");
+                    return htmlMaker.feedHTML(new Gson().toJson(hotel), "web/index.html");
                 }
             }
 
@@ -115,12 +115,12 @@ public class ApiController extends Thread {
             try {
                 hotel = bookingScrapper.getHotel(req.params(":id"));
             } catch (Exception e) {
-                FileInputStream fileInputStream = new FileInputStream("C:\\Users\\carde\\Desktop\\ULPGC\\BookingScrapper\\src\\main\\java\\web\\error404.html");
+                FileInputStream fileInputStream = new FileInputStream("web/error404.html");
                 return fileInputStream.readAllBytes();
             }
 
             dataBaseDDL.insertIntoTable("hotels", hotel);
-            return htmlMaker.feedHTML(new Gson().toJson(hotel), "src/main/java/web/index.html");
+            return htmlMaker.feedHTML(new Gson().toJson(hotel), "web/index.html");
         });
     }
 
@@ -152,7 +152,7 @@ public class ApiController extends Thread {
                     .map(o -> (Hotel) o)
                     .collect(Collectors.toList());
 
-            return htmlMaker.feedHTML(new Gson().toJson(hotels), "src/main/java/web/index.html");
+            return htmlMaker.feedHTML(new Gson().toJson(hotels), "web/index.html");
         });
     }
 
