@@ -30,7 +30,7 @@ public class ApiController {
     }
 
     public void run() {
-        port(8080);
+        port(8086);
 
         initialGetReq();
         getJsonReq("comments");
