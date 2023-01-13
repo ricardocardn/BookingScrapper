@@ -1,15 +1,13 @@
 package controller;
 
-import controller.api.ApiController;
+import view.ApiController;
 import controller.scrapping.BookingScrapper;
 import controller.scrapping.HotelScrapper;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         HotelScrapper hotelScrapper = new BookingScrapper();
         ApiController apiController = new ApiController(hotelScrapper);
-
-        apiController.start();
-        apiController.join();
+        apiController.run();
     }
 }

@@ -1,4 +1,4 @@
-package web;
+package controller.web;
 
 import java.io.*;
 
@@ -24,14 +24,14 @@ public class HTMLMaker {
             String line = br.readLine();
             while (line != null) {
                 if (line.charAt(0) == '<' && line.charAt(1) == '!') {
-                    html.append("<p>" + json + "</p>");
+                    html.append("<p>").append(json).append("</p>");
                 } else {
                     html.append(line);
                 }
 
                 line = br.readLine();
             }
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
 
         return html.toString();
     }

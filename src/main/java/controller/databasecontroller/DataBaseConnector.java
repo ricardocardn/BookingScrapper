@@ -1,27 +1,18 @@
 package controller.databasecontroller;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 
-public class DataBaseConnection {
-    private String dbPath;
+public class DataBaseConnector {
+    private final String dbPath;
     private Connection conn;
 
-    /*
-     * Class Constructor
-     * @param dbPath: String with the local url of the database
-     */
-    public DataBaseConnection(String dbPath) {
+    public DataBaseConnector(String dbPath) {
         this.dbPath = dbPath;
         connect();
     }
 
-    /*
-     * Method that establishes a connection with the database
-     * given as class params
-     */
-    public boolean connect() {
+    public void connect() {
         String dbPath = "jdbc:sqlite:" + this.dbPath;
         Connection conn = null;
         try {
@@ -34,15 +25,13 @@ public class DataBaseConnection {
             try {
                 if (conn != null) {
                     this.conn = conn;
-                    return true;
                 }
 
             } catch (Exception ex) {
-                System.out.printf(ex.getMessage());
+                System.out.print(ex.getMessage());
             }
         }
 
-        return false;
     }
 
     public Connection getConn() {
@@ -53,10 +42,6 @@ public class DataBaseConnection {
         return dbPath;
     }
 
-    /*
-     * Method that closed the opened connection with the database
-     * given as class params
-     */
     public boolean disconnect() {
         if (conn != null) {
             try {
@@ -65,7 +50,7 @@ public class DataBaseConnection {
                 return true;
 
             } catch (Exception ex) {
-                System.out.printf(ex.getMessage());
+                System.out.print(ex.getMessage());
             }
         }
 

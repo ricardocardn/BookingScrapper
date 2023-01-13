@@ -142,7 +142,7 @@ public class Hotel {
                 '}';
     }
 
-    public String get(String key) {
+    public Object get(String key) {
         if (key.equalsIgnoreCase("stars")) return Integer.toString(this.stars);
         else if (key.equalsIgnoreCase("type")) return this.type;
         else return null;

@@ -1,6 +1,7 @@
 package controller.scrapping;
 
 import model.Hotel;
+import model.HotelAPI;
 import model.Review;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -19,23 +20,8 @@ public class BookingScrapper implements HotelScrapper {
 
     public BookingScrapper() {}
 
-    public List<Hotel> getHotels(String url) throws Exception {
-        Connection conn = Jsoup.connect(url).userAgent("Chrome/5.0").timeout(100000);
-        Document doc = conn.get();
-        Elements elements = doc.select("div.a826ba81c4.fe821aea6c.fa2f36ad22.afd256fc79.d08f526e0d.ed11e24d01.ef9845d4b3.da89aeb942");
-
-        List<Hotel> hotels = new ArrayList<>();
-
-        for (Element element : elements) {
-            String aLink = element.select("a.e13098a59f").attr("href");
-            Hotel hotel = getHotel(aLink);
-            hotels.add(hotel);
-        }
-        return hotels;
-    }
-
-    public Hotel getHotel(String name) throws Exception {
-        Hotel hotel = new Hotel();
+    public Hotel getHotel(String name, int pages) throws Exception {
+        Hotel hotel = new HotelAPI();
 
         Connection hotelConn = Jsoup.connect("https://www.booking.com/hotel/es/" + name + ".es.html").userAgent("Mozilla/5.0").timeout(100000);
         Document hotelDoc = hotelConn.get();
@@ -43,7 +29,7 @@ public class BookingScrapper implements HotelScrapper {
         getGeneralInfo(name, hotel, hotelDoc);
         getGrades(hotel, hotelDoc);
         getServices(hotel, hotelDoc);
-        getReviews(hotel, hotelDoc, hotelConn, name);
+        getReviews(hotel, hotelDoc, hotelConn, name, pages);
         hotel.setTotalReviews(hotel.getReviews().size());
 
         return hotel;
@@ -58,18 +44,21 @@ public class BookingScrapper implements HotelScrapper {
         hotel.setAddress(hotelDoc.select("span.hp_address_subtitle.js-hp_address_subtitle.jq_tooltip").text());
     }
 
-    private void getReviews(Hotel hotel, Document hotelDoc, Connection hotelConn, String name) throws IOException {
-        String urlReviews = "https://www.booking.com/reviews/es/hotel/" + name + ".es.html";
-        System.out.println(urlReviews);
-        Connection hotelReviewsConn = Jsoup.connect(urlReviews).userAgent("Mozilla/5.0").timeout(100000);
-        Document hotelReviewsDoc = hotelReviewsConn.get();
+    private void getReviews(Hotel hotel, Document hotelDoc, Connection hotelConn, String name, int pages) throws IOException {
+        String urlReviews = "https://www.booking.com/reviews/es/hotel/" + name + ".es.html?page=";
 
-        Elements docReviews = hotelReviewsDoc.select("div.review_item_review_container.lang_ltr");
         List<Review> reviews = new ArrayList<>();
-
-        for (Element docReview : docReviews) {
-            Review review = getReview(name, docReview);
-            reviews.add(review);
+        System.out.println("ok");
+        for (int i = 1; i < pages + 1; i++) {
+            Connection hotelReviewsConn = Jsoup.connect(urlReviews + i + "&r_lang=es&rows=75&").userAgent("Mozilla/5.0").timeout(100000);
+            System.out.println(urlReviews + i + "&r_lang=es&rows=75&");
+            Document hotelReviewsDoc = hotelReviewsConn.get();
+            Elements docReviews = hotelReviewsDoc.select("div.review_item_review_container.lang_ltr");
+            if (docReviews.size() == 0) break;
+            for (Element docReview : docReviews) {
+                Review review = getReview(name, docReview);
+                reviews.add(review);
+            }
         }
 
         hotel.setReviews(reviews);

@@ -8,14 +8,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DataBaseDDL implements DDLdb {
+public class DataBaseDDL implements StandardDDL {
     private static DataBaseDDL dataBaseDDL;
-    private DataBaseConnection dataBaseConnection;
-    private int id = 0;
+    private final DataBaseConnector dataBaseConnection;
+    private final int id = 0;
 
-    public DataBaseDDL(DataBaseConnection dataBaseConnection) {
+    public DataBaseDDL(DataBaseConnector dataBaseConnection) {
         this.dataBaseConnection = dataBaseConnection;
-        this.dataBaseDDL = this;
+        dataBaseDDL = this;
     }
 
     public static DataBaseDDL getInstance() throws SQLException {
@@ -63,16 +63,9 @@ public class DataBaseDDL implements DDLdb {
     private void createReviewsTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Reviews (\n"
                 + "hotelId TEXT NOT NULL,\n"
-                + "title text NOT NULL,\n"
                 + "score integer,\n"
                 + "positive TEXT,\n"
                 + "negative TEXT,\n"
-                + "travellerType TEXT integer,\n"
-                + "room TEXT integer,\n"
-                + "nightStay integer integer,\n"
-                + "date TEXT integer,\n"
-                + "country TEXT integer,\n"
-                + "countryCode TEXT,\n"
                 + "FOREIGN KEY(hotelId) REFERENCES Hotels(id)\n"
                 + ");";
 
@@ -107,7 +100,7 @@ public class DataBaseDDL implements DDLdb {
             pstmt.setFloat(5, hotel.getRating());
             pstmt.setInt(6, hotel.getTotalReviews());
             pstmt.setString(7, new Gson().toJson(hotel.getReviews()));
-            pstmt.setString(8, hotel.getAddress().toString());
+            pstmt.setString(8, hotel.getAddress());
             pstmt.setString(9, new Gson().toJson(hotel.getServices()));
             pstmt.setString(10, new Gson().toJson(hotel.getGrades()));
             pstmt.executeUpdate();
@@ -119,21 +112,14 @@ public class DataBaseDDL implements DDLdb {
 
     private void insertIntoReviews(Review review) {
 
-        String sql = "INSERT INTO Reviews(hotelId,title,score,positive,negative,travellerType,room,nightStay,date,country,countryCode) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Reviews(hotelId,score,positive,negative) VALUES(?,?,?,?)";
         try {
             if (dataBaseConnection.getConn() == null) dataBaseConnection.connect();
             PreparedStatement pstmt = dataBaseConnection.getConn().prepareStatement(sql);
             pstmt.setString(1, review.getHotelId());
-            pstmt.setString(2, review.getTitle());
-            pstmt.setInt(3, review.getScore());
-            pstmt.setString(4, review.getPositive());
-            pstmt.setString(5, review.getNegative());
-            pstmt.setString(6, review.getTravellerType());
-            pstmt.setString(7, review.getRoom());
-            pstmt.setInt(8, review.getNightsStay());
-            pstmt.setString(9, review.getDate());
-            pstmt.setString(10, review.getCountry());
-            pstmt.setString(11, review.getCountryCode());
+            pstmt.setInt(2, review.getScore());
+            pstmt.setString(3, review.getPositive());
+            pstmt.setString(4, review.getNegative());
             pstmt.executeUpdate();
 
         } catch (Exception ex) {
